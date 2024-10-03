@@ -3,6 +3,9 @@
   "private": true,
   "scripts": {
     "clean": "rm -f bun.lockb",
+    "db:generate": "cd ./packages/database && bun db:generate",
+    "db:push": "cd ./packages/database && bun db:push",
+    "db:studio": "cd ./packages/database && bun db:studio",
     "start": "concurrently -k -n website,key-service -c green,blue \"bun start:website\" \"bun start:key-service\"",
     "dev": "concurrently -k -n website,key-service -c green,blue \"bun dev:website\" \"bun dev:key-service\"",
     "build": "concurrently -k -n website,key-service -c green,blue \"bun build:website\" \"bun build:key-service\""

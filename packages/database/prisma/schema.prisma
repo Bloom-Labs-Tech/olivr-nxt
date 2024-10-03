@@ -6,3 +6,119 @@ datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id String @id
+
+  guilds          GuildMember[]
+  keys            ApiKey[]
+  sessions        Session[]
+  tickets         Ticket[]
+  ticketsClosedBy Ticket[]        @relation("ClosedBy")
+  messages        TicketMessage[]
+}
+
+model Session {
+  id     String @id @default(cuid())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  accessToken  String
+  refreshToken String
+
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Guild {
+  id       String         @id
+  members  GuildMember[]
+  tickets  Ticket[]
+  settings GuildSettings?
+}
+
+model GuildSettings {
+  id    String @id
+  guild Guild? @relation(fields: [id], references: [id])
+
+  levelingEnabled   Boolean @default(false)
+  levelingRoles     String
+  levelingChannelId String
+  levelingMessage   String
+
+  ticketEnabled      Boolean @default(false)
+  ticketCategory     String
+  ticketLogChannelId String
+  ticketLogMessage   String
+  ticketLogEnabled   Boolean @default(false)
+
+  welcomeEnabled   Boolean @default(false)
+  welcomeChannelId String
+  welcomeMessage   String
+
+  leaveEnabled   Boolean @default(false)
+  leaveChannelId String
+  leaveMessage   String
+
+  autoRoleEnabled Boolean @default(false)
+  autoRoleRoles   String
+}
+
+model GuildMember {
+  guild   Guild  @relation(fields: [guildId], references: [id])
+  guildId String
+  user    User   @relation(fields: [userId], references: [id])
+  userId  String
+
+  xp         Int      @default(0)
+  xpCooldown DateTime @default(now())
+
+  messagesSent Int @default(0)
+  voiceTime    Int @default(0)
+  commandsUsed Int @default(0)
+
+  @@id([guildId, userId])
+  @@unique([guildId, userId])
+}
+
+model Ticket {
+  id        String          @id
+  guild     Guild           @relation(fields: [guildId], references: [id])
+  guildId   String
+  creator   User            @relation(fields: [creatorId], references: [id])
+  creatorId String
+  messages  TicketMessage[]
+
+  createdAt  DateTime  @default(now())
+  closedAt   DateTime?
+  closedBy   User?     @relation(fields: [closedById], references: [id], name: "ClosedBy")
+  closedById String?
+}
+
+model TicketMessage {
+  id       String @id
+  ticket   Ticket @relation(fields: [ticketId], references: [id])
+  ticketId String
+
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId String
+
+  content String
+  sentAt  DateTime
+}
+
+model ApiKey {
+  id     String @id
+  key    String @unique
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  uses      Int     @default(0)
+  maxUses   Int?
+  active    Boolean @default(true)
+  rateLimit Int     @default(0)
+
+  createdAt DateTime  @default(now())
+  lastUsed  DateTime  @default(now())
+  expiresAt DateTime?
+}
