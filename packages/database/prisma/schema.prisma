@@ -10,12 +10,13 @@ datasource db {
 model User {
   id String @id
 
-  guilds          GuildMember[]
-  keys            ApiKey[]
-  sessions        Session[]
-  tickets         Ticket[]
-  ticketsClosedBy Ticket[]        @relation("ClosedBy")
-  messages        TicketMessage[]
+  guilds         GuildMember[]
+  keys           ApiKey[]
+  sessions       Session[]
+  tickets        Ticket[]
+  ticketsClosed  Ticket[]        @relation("ClosedBy")
+  ticketsClaimed Ticket[]        @relation("ClaimedBy")
+  messages       TicketMessage[]
 }
 
 model Session {
@@ -31,37 +32,9 @@ model Session {
 }
 
 model Guild {
-  id       String         @id
-  members  GuildMember[]
-  tickets  Ticket[]
-  settings GuildSettings?
-}
-
-model GuildSettings {
-  id    String @id
-  guild Guild? @relation(fields: [id], references: [id])
-
-  levelingEnabled   Boolean @default(false)
-  levelingRoles     String
-  levelingChannelId String
-  levelingMessage   String
-
-  ticketEnabled      Boolean @default(false)
-  ticketCategory     String
-  ticketLogChannelId String
-  ticketLogMessage   String
-  ticketLogEnabled   Boolean @default(false)
-
-  welcomeEnabled   Boolean @default(false)
-  welcomeChannelId String
-  welcomeMessage   String
-
-  leaveEnabled   Boolean @default(false)
-  leaveChannelId String
-  leaveMessage   String
-
-  autoRoleEnabled Boolean @default(false)
-  autoRoleRoles   String
+  id      String        @id
+  members GuildMember[]
+  tickets Ticket[]
 }
 
 model GuildMember {
@@ -89,10 +62,13 @@ model Ticket {
   creatorId String
   messages  TicketMessage[]
 
-  createdAt  DateTime  @default(now())
-  closedAt   DateTime?
-  closedBy   User?     @relation(fields: [closedById], references: [id], name: "ClosedBy")
-  closedById String?
+  createdAt   DateTime  @default(now())
+  claimedAt   DateTime?
+  claimedBy   User?     @relation(fields: [claimedById], references: [id], name: "ClaimedBy")
+  claimedById String?
+  closedAt    DateTime?
+  closedBy    User?     @relation(fields: [closedById], references: [id], name: "ClosedBy")
+  closedById  String?
 }
 
 model TicketMessage {

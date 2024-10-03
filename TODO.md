@@ -15,9 +15,7 @@
 - [ ] Is Complete
   - [ ] Add a `ticketEnabled` toggle (Boolean) to enable/disable the ticketing system.
   - [ ] Store `ticketCategory` (String) for the category where tickets are created.
-  - [ ] Add `ticketLogChannelId` (String) for the channel where ticket logs are sent.
-  - [ ] Add a `ticketLogMessage` (String) to format ticket log messages.
-  - [ ] Add a `ticketLogEnabled` toggle (Boolean) to enable/disable ticket logs.
+  - [ ] Add a `ticketMessage` (String) for the message format when a ticket is created.
 
 ### Welcome System
 
