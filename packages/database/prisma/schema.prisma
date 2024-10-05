@@ -3,20 +3,54 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+enum Feature {
+  moderation
+  welcome
+  goodbye
+  autorole
+  logs
+  music
+  fun
+  utility
+  leveling
+  economy
+  tickets
+  announcement
+  events
+  generators
+  suggestions
+  security
+  counting
+}
+
+enum Region {
+  na
+  eu
+  ap
+  kr
 }
 
 model User {
   id String @id
 
-  guilds         GuildMember[]
-  keys           ApiKey[]
-  sessions       Session[]
-  tickets        Ticket[]
-  ticketsClosed  Ticket[]        @relation("ClosedBy")
-  ticketsClaimed Ticket[]        @relation("ClaimedBy")
-  messages       TicketMessage[]
+  guilds   GuildMember[]
+  keys     ApiKey[]
+  sessions Session[]
+  messages TicketMessage[]
+
+  valorant ValorantUser?
+}
+
+model ValorantUser {
+  puuid  String @id
+  region Region
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
 }
 
 model Session {
@@ -32,9 +66,10 @@ model Session {
 }
 
 model Guild {
-  id      String        @id
-  members GuildMember[]
-  tickets Ticket[]
+  id       String         @id
+  members  GuildMember[]
+  tickets  Ticket[]
+  features GuildFeature[]
 }
 
 model GuildMember {
@@ -46,9 +81,9 @@ model GuildMember {
   xp         Int      @default(0)
   xpCooldown DateTime @default(now())
 
-  messagesSent Int @default(0)
-  voiceTime    Int @default(0)
-  commandsUsed Int @default(0)
+  tickets        Ticket[]
+  ticketsClosed  Ticket[] @relation("ClosedBy")
+  ticketsClaimed Ticket[] @relation("ClaimedBy")
 
   @@id([guildId, userId])
   @@unique([guildId, userId])
@@ -56,18 +91,19 @@ model GuildMember {
 
 model Ticket {
   id        String          @id
+  channelId String?
   guild     Guild           @relation(fields: [guildId], references: [id])
   guildId   String
-  creator   User            @relation(fields: [creatorId], references: [id])
+  creator   GuildMember     @relation(fields: [creatorId, guildId], references: [userId, guildId])
   creatorId String
   messages  TicketMessage[]
 
-  createdAt   DateTime  @default(now())
+  createdAt   DateTime     @default(now())
   claimedAt   DateTime?
-  claimedBy   User?     @relation(fields: [claimedById], references: [id], name: "ClaimedBy")
+  claimedBy   GuildMember? @relation(fields: [claimedById, guildId], references: [userId, guildId], name: "ClaimedBy")
   claimedById String?
   closedAt    DateTime?
-  closedBy    User?     @relation(fields: [closedById], references: [id], name: "ClosedBy")
+  closedBy    GuildMember? @relation(fields: [closedById, guildId], references: [userId, guildId], name: "ClosedBy")
   closedById  String?
 }
 
@@ -79,8 +115,8 @@ model TicketMessage {
   author   User   @relation(fields: [authorId], references: [id])
   authorId String
 
-  content String
-  sentAt  DateTime
+  content   String
+  createdAt DateTime @default(now())
 }
 
 model ApiKey {
@@ -97,4 +133,16 @@ model ApiKey {
   createdAt DateTime  @default(now())
   lastUsed  DateTime  @default(now())
   expiresAt DateTime?
+}
+
+model GuildFeature {
+  enabled Boolean @default(false)
+  name    Feature
+  data    Json?   @default("{}")
+
+  guild   Guild  @relation(fields: [guildId], references: [id])
+  guildId String
+
+  @@id([name, guildId])
+  @@unique([name, guildId])
 }

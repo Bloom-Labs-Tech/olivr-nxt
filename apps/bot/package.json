@@ -1,0 +1,27 @@
+{
+  "name": "@olivr-nxt/bot",
+  "version": "0.0.1",
+  "main": "src/index.ts",
+  "description": "",
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "start": "bun src/index.ts",
+    "build": "bun build ./src/index.ts --outdir ./dist --minify --splitting"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.4.1",
+    "@types/bun": "latest",
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "@ivanoliverfabra/valorant-api": "^1.0.5",
+    "@olivr-nxt/common": "workspace:*",
+    "@olivr-nxt/database": "workspace:*",
+    "@sapphire/discord.js-utilities": "^7.3.0",
+    "@t3-oss/env-core": "^0.11.1",
+    "canvacord": "^6.0.2",
+    "colors": "^1.4.0",
+    "discord.js": "^14.16.3",
+    "zod": "^3.23.8"
+  }
+}
