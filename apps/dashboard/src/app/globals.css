@@ -1,0 +1,241 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/assets/fonts/PlusJakartaSans/PlusJakartaSans-Bold.ttf")
+    format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/assets/fonts/PlusJakartaSans/PlusJakartaSans-BoldItalic.ttf")
+    format("truetype");
+  font-weight: 700;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/assets/fonts/PlusJakartaSans/PlusJakartaSans-ExtraBold.ttf")
+    format("truetype");
+  font-weight: 800;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/assets/fonts/PlusJakartaSans/PlusJakartaSans-ExtraBoldItalic.ttf")
+    format("truetype");
+  font-weight: 800;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/assets/fonts/PlusJakartaSans/PlusJakartaSans-ExtraLight.ttf")
+    format("truetype");
+  font-weight: 200;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/assets/fonts/PlusJakartaSans/PlusJakartaSans-ExtraLightItalic.ttf")
+    format("truetype");
+  font-weight: 200;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/assets/fonts/PlusJakartaSans/PlusJakartaSans-Italic.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/assets/fonts/PlusJakartaSans/PlusJakartaSans-Light.ttf")
+    format("truetype");
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/assets/fonts/PlusJakartaSans/PlusJakartaSans-LightItalic.ttf")
+    format("truetype");
+  font-weight: 300;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/assets/fonts/PlusJakartaSans/PlusJakartaSans-Medium.ttf")
+    format("truetype");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/assets/fonts/PlusJakartaSans/PlusJakartaSans-MediumItalic.ttf")
+    format("truetype");
+  font-weight: 500;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/assets/fonts/PlusJakartaSans/PlusJakartaSans-Regular.ttf")
+    format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/assets/fonts/PlusJakartaSans/PlusJakartaSans-SemiBold.ttf")
+    format("truetype");
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/assets/fonts/PlusJakartaSans/PlusJakartaSans-SemiBoldItalic.ttf")
+    format("truetype");
+  font-weight: 600;
+  font-style: italic;
+}
+
+@layer base {
+  :root {
+    --background: 219 80% 8%; /* Background: #040f24 */
+    --foreground: 246 76% 95%; /* Text: #ebe9fc */
+    --card: 219 56% 11%; /* Background: #040f24 (reuse for card background) */
+    --card-foreground: 246 76% 95%; /* Text: #ebe9fc (reuse for card text) */
+    --popover: 219 80% 8%; /* Background: #040f24 */
+    --popover-foreground: 246 76% 95%; /* Text: #ebe9fc */
+    --primary: 246 51% 33%; /* Primary: #332a80 */
+    --primary-foreground: 246 76% 95%; /* Text: #ebe9fc (for contrast with primary) */
+    --secondary: 207 80% 80%; /* Secondary: #A4D0F5 */
+    --secondary-foreground: 219 80% 8%; /* Background: #040f24 (for contrast with secondary) */
+    --muted: 209 59% 30%; /* Accent: #1F4E79 */
+    --muted-foreground: 246 76% 95%; /* Text: #ebe9fc (for contrast with muted) */
+    --accent: 209 59% 30%; /* Accent: #1F4E79 */
+    --accent-foreground: 246 76% 95%; /* Text: #ebe9fc */
+    --destructive: 0 62.8% 30.6%; /* Keeping this unchanged for the destructive color */
+    --destructive-foreground: 246 76% 95%; /* Text: #ebe9fc (for contrast with destructive) */
+    --border: 209 59% 30%; /* Accent: #1F4E79 (for border) */
+    --input: 209 59% 30%; /* Accent: #1F4E79 (for input backgrounds) */
+    --ring: 246 51% 33%; /* Primary: #332a80 (for focus rings) */
+    --chart-1: 207 80% 80%; /* Secondary: #A4D0F5 */
+    --chart-2: 209 59% 30%; /* Accent: #1F4E79 */
+    --chart-3: 246 51% 33%; /* Primary: #332a80 */
+    --chart-4: 0 62.8% 30.6%; /* Keeping this as a default for destructive or alert charts */
+    --chart-5: 246 76% 95%; /* Text: #ebe9fc for a bright highlight in charts */
+    --radius: 0.5rem; /* Keeping the border-radius unchanged */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border/35;
+  }
+  body {
+    @apply bg-background font-plus-jakarta antialiased;
+    color: hsl(var(--foreground));
+  }
+  *::-webkit-scrollbar {
+    @apply w-2 h-2 transition-colors duration-500;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    @apply bg-white/20 rounded-full;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    @apply bg-white/40;
+  }
+
+  *::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  body::-webkit-scrollbar {
+    @apply w-2 h-2 !bg-gray-900 transition-colors duration-500;
+  }
+  .thin-scrollbar::-webkit-scrollbar {
+    @apply w-0.5 h-0.5;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    @apply w-0 h-0;
+  }
+}
+
+#cards:hover > .card::after {
+  opacity: 1;
+}
+
+.card {
+  background-color: hsl(var(--border) / 0.3);
+  border-radius: var(--radius);
+  cursor: pointer;
+  height: 200px;
+  width: 400px;
+  position: relative;
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+.card::before,
+.card::after {
+  border-radius: inherit;
+  content: "";
+  height: 100%;
+  left: 0px;
+  opacity: 0;
+  position: absolute;
+  top: 0px;
+  transition: opacity 500ms;
+  width: 100%;
+}
+
+.card::before {
+  background: radial-gradient(
+    800px circle at var(--mouse-x) var(--mouse-y),
+    hsl(var(--accent) / 0.1),
+    transparent 40%
+  );
+  z-index: 3;
+}
+
+.card::after {
+  background: radial-gradient(
+    600px circle at var(--mouse-x) var(--mouse-y),
+    hsl(var(--accent) / 0.8),
+    transparent 40%
+  );
+  z-index: 1;
+}
+
+.card > .card-content {
+  background-color: hsl(var(--card));
+  border-radius: inherit;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  inset: 1px;
+  padding: 16px;
+  position: absolute;
+  z-index: 2;
+}

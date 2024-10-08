@@ -14,14 +14,20 @@
     "typescript": "^5.5.4"
   },
   "dependencies": {
+    "@discordjs/opus": "^0.9.0",
     "@ivanoliverfabra/valorant-api": "^1.0.5",
     "@olivr-nxt/common": "workspace:*",
     "@olivr-nxt/database": "workspace:*",
     "@sapphire/discord.js-utilities": "^7.3.0",
     "@t3-oss/env-core": "^0.11.1",
     "canvacord": "^6.0.2",
+    "canvas": "^2.11.2",
     "colors": "^1.4.0",
+    "discord-music-player": "^9.1.1",
     "discord.js": "^14.16.3",
+    "hono": "^4.6.3",
+    "ioredis": "^5.4.1",
+    "isomorphic-unfetch": "^4.0.2",
     "zod": "^3.23.8"
   }
 }

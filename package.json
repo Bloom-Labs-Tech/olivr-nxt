@@ -9,15 +9,25 @@
     "start:bot": "cd ./apps/bot && bun start",
     "dev:bot": "cd ./apps/bot && bun dev",
     "build:bot": "cd ./apps/bot && bun build",
-    "start": "concurrently -k -n bot -c green \"bun start:bot\"",
-    "dev": "concurrently -k -n bot -c green \"bun dev:bot\"",
-    "build": "concurrently -k -n bot -c green \"bun build:bot\""
+    "start:dashboard": "cd ./apps/dashboard && bun start",
+    "dev:dashboard": "cd ./apps/dashboard && bun dev",
+    "build:dashboard": "cd ./apps/dashboard && bun build",
+    "start": "concurrently -k -n bot,dashboard -c green,blue \"bun start:bot\" \"bun start:dashboard\"",
+    "dev": "concurrently -k -n bot,dashboard -c green,blue \"bun dev:bot\" \"bun dev:dashboard\"",
+    "build": "concurrently -k -n bot,dashboard -c green,blue \"bun build:bot\" \"bun build:dashboard\""
   },
   "workspaces": [
     "packages/*",
     "apps/*"
   ],
   "devDependencies": {
+    "canvas": "^2.11.2",
     "concurrently": "^9.0.1"
+  },
+  "dependencies": {
+    "@discordjs/opus": "^0.9.0",
+    "@napi-rs/canvas": "^0.1.56",
+    "moment": "^2.30.1",
+    "node-canvas": "^2.9.0"
   }
 }

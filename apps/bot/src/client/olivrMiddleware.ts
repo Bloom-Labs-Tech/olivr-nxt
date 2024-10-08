@@ -1,8 +1,8 @@
 import type { CommandInteraction } from 'discord.js';
-import { client } from '~/index';
+import { OliverBot } from './olivrClient';
 
 export class OliverMiddleware {
-  public readonly client = client;
+  public readonly client = OliverBot.getInstance();
 
   public async run(_: CommandInteraction): Promise<boolean> {
     return true;

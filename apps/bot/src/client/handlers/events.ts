@@ -1,30 +1,48 @@
+import type { PlayerEvents } from 'discord-music-player';
 import type { ClientEvents } from 'discord.js';
-import { client } from '~/index';
 import { getFiles } from '~/utils/helpers';
-import { OliverEvent } from '../olivrEvent';
+import type { OliverBot } from '../olivrClient';
+import { OliverEvent, type OliverEventEmitterType, type OliverEventType } from '../olivrEvent';
 
 export class EventHandler {
-  public readonly client = client;
-  private events: Map<string, OliverEvent<keyof ClientEvents>> = new Map();
+  constructor(private client: OliverBot) {}
+  private clientEvents: Map<string, OliverEvent<keyof ClientEvents, 'client'>> = new Map();
+  private playerEvents: Map<string, OliverEvent<keyof PlayerEvents, 'player'>> = new Map();
 
-  public async registerEvent(event: OliverEvent<keyof ClientEvents>): Promise<void> {
-    if (event.runOnce) {
-      this.client.once(event.name, (...args) =>
-        event.execute(...args).catch((error) => this.client.logger.error(`${event.name} error: `, error)),
-      );
-    } else {
-      this.client.on(event.name, (...args) =>
-        event.execute(...args).catch((error) => this.client.logger.error(`${event.name} error: `, error)),
-      );
+  public async registerEvent<T extends OliverEventEmitterType>(event: OliverEvent<keyof OliverEventType<T>, T>): Promise<void> {
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    const eventHandler = (...args: any[]) =>
+      event.execute(...args).catch((error) => this.client.logger.error(`${String(event.name)} error: `, error));
+
+    if (event.emitter === 'client') {
+      if (event.runOnce) {
+        this.client.once(event.name as keyof ClientEvents, eventHandler);
+      } else {
+        this.client.on(event.name as keyof ClientEvents, eventHandler);
+      }
+      this.clientEvents.set(event.name as string, event as OliverEvent<keyof ClientEvents, 'client'>);
+    } else if (event.emitter === 'player') {
+      if (event.runOnce) {
+        this.client.player.once(event.name as keyof PlayerEvents, eventHandler);
+      } else {
+        this.client.player.on(event.name as keyof PlayerEvents, eventHandler);
+      }
+      this.playerEvents.set(event.name as string, event as OliverEvent<keyof PlayerEvents, 'player'>);
     }
-    this.events.set(event.name, event);
   }
 
-  public async unregisterEvent(event: OliverEvent<keyof ClientEvents>): Promise<void> {
-    this.client.off(event.name, (...args) =>
-      event.execute(...args).catch((error) => this.client.logger.error(`${event.name} error: `, error)),
-    );
-    this.events.delete(event.name);
+  public async unregisterEvent<T extends OliverEventEmitterType>(event: OliverEvent<keyof OliverEventType<T>, T>): Promise<void> {
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  const eventHandler = (...args: any[]) =>
+      event.execute(...args).catch((error) => this.client.logger.error(`${String(event.name)} error: `, error));
+
+    if (event.emitter === 'client') {
+      this.client.off(event.name as keyof ClientEvents, eventHandler);
+      this.clientEvents.delete(event.name as string);
+    } else if (event.emitter === 'player') {
+      this.client.player.off(event.name as keyof PlayerEvents, eventHandler);
+      this.playerEvents.delete(event.name as string);
+    }
   }
 
   public async registerEvents(): Promise<void> {
@@ -33,7 +51,7 @@ export class EventHandler {
     const eventFiles = await getFiles('./src/events');
 
     for (const file of eventFiles) {
-      const relativePath = `../${file.replace('src/', '')}`;
+      const relativePath = `../../${file.replace('src/', '')}`;
       try {
         const EventClass = (await import(relativePath)).default;
         if (EventClass && EventClass.prototype instanceof OliverEvent) {
@@ -47,14 +65,17 @@ export class EventHandler {
       }
     }
 
-    this.client.logger.info(`Registered ${this.events.size} events`);
+    this.client.logger.info(`Registered ${this.clientEvents.size + this.playerEvents.size} events`);
 
     const end = Date.now();
     this.client.logger.info(`Event registration took ${end - start}ms`);
   }
 
   public async unregisterEvents(): Promise<void> {
-    for (const event of this.events.values()) {
+    for (const event of this.clientEvents.values()) {
+      await this.unregisterEvent(event);
+    }
+    for (const event of this.playerEvents.values()) {
       await this.unregisterEvent(event);
     }
   }

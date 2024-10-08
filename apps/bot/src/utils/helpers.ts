@@ -19,3 +19,8 @@ export async function getFiles(dir: string, fileList: string[] = []): Promise<st
 
   return fileList;
 }
+
+export function formatEmoji(emoji?: { name: string; id: string; animated: boolean }) {
+  if (!emoji) return '❔';
+  return `<${emoji.animated ? 'a' : ''}:${emoji.name}:${emoji.id}>`;
+}

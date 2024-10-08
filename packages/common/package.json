@@ -11,6 +11,15 @@
     },
     "./embeds": {
       "import": "./src/embeds.ts"
+    },
+    "./features": {
+      "import": "./src/features.ts"
+    },
+    "./schemas": {
+      "import": "./src/schemas.ts"
+    },
+    "./types": {
+      "import": "./src/types.ts"
     }
   },
   "devDependencies": {

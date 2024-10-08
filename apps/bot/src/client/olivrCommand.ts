@@ -1,9 +1,12 @@
 import { OliverError } from '@olivr-nxt/common';
+import type { $Enums } from '@olivr-nxt/database';
 import {
+  type ApplicationCommandDataResolvable,
   ApplicationCommandType,
   type AutocompleteInteraction,
   type ChatInputApplicationCommandData,
   type CommandInteraction,
+  type Interaction,
   type InteractionResponse,
   type Message,
   SlashCommandBuilder,
@@ -12,26 +15,30 @@ import {
   type SlashCommandSubcommandsOnlyBuilder,
 } from 'discord.js';
 import type { OliverMiddleware } from '~/client/olivrMiddleware';
-import { client } from '~/index';
+import { OliverBot } from './olivrClient';
+import { OliverLogger } from './olivrLogger';
 
 export type CommandBuilder =
   | SlashCommandOptionsOnlyBuilder
   | SlashCommandSubcommandsOnlyBuilder
   | SlashCommandBuilder
   | SlashCommandSubcommandBuilder;
-type CommandResponse =
-  // biome-ignore lint/suspicious/noConfusingVoidType: <explanation>
-  | Promise<Message<boolean> | InteractionResponse | undefined | void>
-  | Message<boolean>
-  | InteractionResponse
-  | undefined
-  | void;
+
+// biome-ignore lint/suspicious/noConfusingVoidType: <explanation>
+type  CommandResponse = Promise<Message | InteractionResponse | void> | Message | InteractionResponse | void;
+
+type Subcommand = {
+  name: string;
+  description: string;
+  examples?: string[];
+};
 
 export type CommandJSON = {
   name: string;
   description: string;
   examples: string[];
   category: string;
+  subcommands?: Subcommand[];
 };
 
 type CommandOptions = {
@@ -40,71 +47,61 @@ type CommandOptions = {
   category?: string;
   examples?: string[];
   middlewares?: OliverMiddleware | OliverMiddleware[];
+  type: keyof typeof $Enums.Feature | 'other';
+  subcommands?: Subcommand[];
 };
 
-export abstract class OliverCommand {
-  public readonly client = client;
+export class OliverCommand {
+  client = OliverBot.getInstance();
   public readonly name: string;
+  public readonly type: keyof typeof $Enums.Feature | 'other';
   public readonly description: string;
   public readonly category: string;
   public readonly examples: string[];
-  public middlewares?: OliverMiddleware | OliverMiddleware[];
+  public readonly middlewares: OliverMiddleware[];
+  public readonly subcommands: Subcommand[];
 
   constructor(options: CommandOptions) {
     this.name = options.name;
+    this.type = options.type;
     this.description = options.description;
     this.category = options.category || 'other';
     this.examples = options.examples || [];
-    this.middlewares = options.middlewares || [];
+    this.middlewares = Array.isArray(options.middlewares) ? options.middlewares : [options.middlewares].filter((m) => !!m);
+    this.subcommands = options.subcommands || [];
   }
 
-  public registerApplicationCommands(): CommandBuilder {
+  public registerApplicationCommands(): ApplicationCommandDataResolvable {
     return new SlashCommandBuilder().setName(this.name).setDescription(this.description);
   }
 
-  public abstract run(interaction: CommandInteraction): CommandResponse;
-
-  public autocomplete(interaction: AutocompleteInteraction): CommandResponse {
-    if (interaction.responded) {
-      return;
-    }
-
-    return interaction.respond([]);
+  public run(interaction: CommandInteraction): CommandResponse {
+    throw new Error('Method not implemented.');
   }
 
-  private static async runMiddlewares(commandInstance: OliverCommand, interaction: CommandInteraction): Promise<true> {
-    if (!commandInstance.middlewares) {
-      return true;
+  public autocomplete(interaction: AutocompleteInteraction): CommandResponse {
+    if (!interaction.responded) {
+      return interaction.respond([]);
     }
+  }
 
-    if (!Array.isArray(commandInstance.middlewares)) {
-      commandInstance.middlewares = [commandInstance.middlewares];
-    }
+  public collector(interaction: Interaction, subcommand?: string): CommandResponse {
+    throw new Error('Method not implemented.');
+  }
 
+  private static async runMiddlewares(commandInstance: OliverCommand, interaction: CommandInteraction): Promise<boolean> {
     for (const middleware of commandInstance.middlewares) {
       const passed = await middleware.run(interaction);
       if (!passed) {
         throw new OliverError('You do not have permission to run this command.');
       }
     }
-    return true; // All middlewares passed
+    return true;
   }
 
-  private static async isCommandEnabled(
-    commandInstance: OliverCommand,
-    interaction: CommandInteraction,
-  ): Promise<boolean> {
+  private static async isCommandEnabled(commandInstance: OliverCommand, interaction: CommandInteraction): Promise<boolean> {
     if (!interaction.guild) return true;
-
-    // const feature = await getGuildFeature(interaction.guild.id, 'COMMANDS', true);
-    // if (!feature?.isEnabled) {
-    //   return false;
-    // }
-
-    // if (commandInstance.name in feature.data) {
-    //   return feature.data[commandInstance.name as keyof typeof feature.data] ?? true;
-    // }
-
+    // Command feature check could be added here if implemented
     return true;
   }
 
@@ -112,28 +109,31 @@ export abstract class OliverCommand {
     try {
       const isEnabled = await OliverCommand.isCommandEnabled(commandInstance, interaction);
       if (!isEnabled) throw new OliverError('This command is disabled in this server.');
+
       await OliverCommand.runMiddlewares(commandInstance, interaction);
       await commandInstance.run(interaction);
     } catch (error) {
-      client.logger.error('Error running command', error);
-      await interaction.reply({
-        content: error instanceof OliverError ? error.message : 'There was an error executing this command.',
-        ephemeral: true,
-      });
+      const errorMessage = error instanceof OliverError ? error.message : 'There was an error executing this command.';
+      OliverLogger.getInstance().error(`Error running command "${commandInstance.name}":`, error);
+      await interaction.reply({ content: errorMessage, ephemeral: true });
     }
   }
 
-  public static async runAutocomplete(
-    commandInstance: OliverCommand,
-    interaction: AutocompleteInteraction,
-  ): Promise<void> {
+  public static async runCollector(commandInstance: OliverCommand, interaction: Interaction, subcommand?: string): Promise<void> {
     try {
-      if (interaction.responded) {
-        return;
-      }
-      await commandInstance.autocomplete(interaction);
+      await commandInstance.collector(interaction, subcommand);
     } catch (error) {
-      client.logger.error('Error running autocomplete', error);
+      OliverLogger.getInstance().error(`Error running collector for command "${commandInstance.name}":`, error);
+    }
+  }
+
+  public static async runAutocomplete(commandInstance: OliverCommand, interaction: AutocompleteInteraction): Promise<void> {
+    try {
+      if (!interaction.responded) {
+        await commandInstance.autocomplete(interaction);
+      }
+    } catch (error) {
+      OliverLogger.getInstance().error(`Error running autocomplete for command "${commandInstance.name}":`, error);
       await interaction.respond([]);
     }
   }
@@ -144,6 +144,7 @@ export abstract class OliverCommand {
       description: this.description,
       examples: this.examples,
       category: this.category,
+      subcommands: this.subcommands,
     };
   }
 

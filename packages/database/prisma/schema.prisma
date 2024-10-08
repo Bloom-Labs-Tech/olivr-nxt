@@ -25,36 +25,47 @@ enum Feature {
   suggestions
   security
   counting
+  dynamicVoice
 }
 
 enum Region {
   na
   eu
+  latam
+  br
   ap
   kr
 }
 
+enum Platform {
+  CONSOLE
+  PC
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  OWNER
+}
+
 model User {
-  id String @id
+  id    String   @id
+  role  UserRole @default(USER)
+  email String?
 
   guilds   GuildMember[]
   keys     ApiKey[]
   sessions Session[]
   messages TicketMessage[]
+  feedback Feedback[]
 
-  valorant ValorantUser?
-}
-
-model ValorantUser {
-  puuid  String @id
-  region Region
-
-  user   User   @relation(fields: [userId], references: [id])
-  userId String @unique
+  valorantAccounts ValorantUser[]
 }
 
 model Session {
-  id     String @id @default(cuid())
+  id    String @id @default(cuid())
+  token String @unique
+
   user   User   @relation(fields: [userId], references: [id])
   userId String
 
@@ -65,11 +76,48 @@ model Session {
   createdAt DateTime @default(now())
 }
 
+model ValorantUser {
+  puuid     String     @id
+  tag       String
+  tagLine   String
+  region    Region
+  platforms Platform[]
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+}
+
 model Guild {
   id       String         @id
   members  GuildMember[]
   tickets  Ticket[]
   features GuildFeature[]
+
+  featureToggles       Int @default(0)
+  messagesSent         Int @default(0)
+  commandsUsed         Int @default(0)
+  dynamicVoicesCreated Int @default(0)
+  voiceConnections     Int @default(0)
+  ticketsOpened        Int @default(0)
+  ticketsClosed        Int @default(0)
+  suggestions          Int @default(0)
+  votesCast            Int @default(0)
+  moderationActions    Int @default(0)
+  reports              Int @default(0)
+  warnings             Int @default(0)
+  bans                 Int @default(0)
+  kicks                Int @default(0)
+  mutes                Int @default(0)
+  songsPlayed          Int @default(0)
+  generatorsUsed       Int @default(0)
+  usersJoined          Int @default(0)
+  usersLeft            Int @default(0)
+  xpEarned             Int @default(0)
+  levelsGained         Int @default(0)
+
+  isPremium Boolean   @default(false)
+  joinedAt  DateTime  @default(now())
+  leftAt    DateTime?
 }
 
 model GuildMember {
@@ -78,12 +126,36 @@ model GuildMember {
   user    User   @relation(fields: [userId], references: [id])
   userId  String
 
-  xp         Int      @default(0)
-  xpCooldown DateTime @default(now())
+  messagesSent      Int @default(0)
+  commandsUsed      Int @default(0)
+  timeInVoice       Int @default(0)
+  voiceConnections  Int @default(0)
+  ticketsOpened     Int @default(0)
+  ticketsClosed     Int @default(0)
+  suggestions       Int @default(0)
+  votesCast         Int @default(0)
+  moderationActions Int @default(0)
+  reports           Int @default(0)
+  warnings          Int @default(0)
+  bans              Int @default(0)
+  kicks             Int @default(0)
+  mutes             Int @default(0)
+  songsPlayed       Int @default(0)
+  generatorsUsed    Int @default(0)
+  xpEarned          Int @default(0)
+  levelsGained      Int @default(0)
+
+  level         Int       @default(0)
+  xp            Int       @default(0)
+  xpCooldown    DateTime  @default(now())
+  joinedVoiceAt DateTime?
 
   tickets        Ticket[]
-  ticketsClosed  Ticket[] @relation("ClosedBy")
-  ticketsClaimed Ticket[] @relation("ClaimedBy")
+  closedTickets  Ticket[] @relation("ClosedBy")
+  claimedTickets Ticket[] @relation("ClaimedBy")
+
+  joinedAt DateTime  @default(now())
+  leftAt   DateTime?
 
   @@id([guildId, userId])
   @@unique([guildId, userId])
@@ -125,10 +197,11 @@ model ApiKey {
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
-  uses      Int     @default(0)
-  maxUses   Int?
-  active    Boolean @default(true)
-  rateLimit Int     @default(0)
+  uses             Int     @default(0)
+  maxUses          Int?
+  active           Boolean @default(true)
+  rateLimit        Int     @default(0)
+  usesPerRateLimit Int     @default(0)
 
   createdAt DateTime  @default(now())
   lastUsed  DateTime  @default(now())
@@ -145,4 +218,14 @@ model GuildFeature {
 
   @@id([name, guildId])
   @@unique([name, guildId])
+}
+
+model Feedback {
+  id     String @id
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  content   String
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
 }
