@@ -149,7 +149,7 @@
     @apply border-border/35;
   }
   body {
-    @apply bg-background font-plus-jakarta antialiased;
+    @apply bg-background font-plus-jakarta antialiased max-w-[100vw] overflow-x-hidden;
     color: hsl(var(--foreground));
   }
   *::-webkit-scrollbar {
@@ -191,6 +191,64 @@
   height: 200px;
   width: 400px;
   position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add subtle shadow for better card separation */
+  transition: transform 0.3s ease; /* Smooth hover effect */
+}
+
+@media (max-width: 1024px) {
+  .card {
+    height: 250px; /* Adjust height for tablet size */
+    padding: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .card {
+    height: 225px;
+    padding: 10px;
+  }
+}
+
+@media (max-width: 640px) {
+  .card {
+    width: calc(100vw - 32px); /* Full width on mobile */
+    padding: 20px;
+  }
+}
+
+#cards {
+  width: 100%;
+  display: grid;
+  gap: 16px;
+  align-items: center;
+  justify-items: center;
+}
+
+@media (min-width: 600px) {
+  #stats > #cards {
+    grid-template-columns: repeat(2, minmax(225px, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  #stats > #cards {
+    grid-template-columns: repeat(1, minmax(225px, 1fr));
+  }
+}
+
+@media (min-width: 728px) {
+  #features > #cards {
+    grid-template-columns: repeat(3, minmax(300px, 1fr));
+  }
+
+  #stats > #cards {
+    grid-template-columns: repeat(4, minmax(300px, 1fr));
+  }
 }
 
 .card:hover::before {

@@ -25,6 +25,7 @@ export type Stats = {
   xpEarned: number;
   users: number;
   guilds: number;
+  translations: number;
 };
 
 const fetchStats = async (): Promise<Stats> => {
@@ -60,6 +61,7 @@ function useStats() {
       xpEarned: 0,
       guilds: 0,
       users: 0,
+      translations: 0,
     },
   });
 }

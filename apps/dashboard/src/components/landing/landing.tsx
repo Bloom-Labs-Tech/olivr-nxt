@@ -19,10 +19,10 @@ export function LandingSection() {
         keep your community organized and fun.
       </p>
       <div className="flex justify-center space-x-4">
-        <Button className="w-48" variant="secondary" size="lg">
+        <Button className="w-36 md:w-48" variant="secondary" size="lg">
           Discover More
         </Button>
-        <Button className="w-48" size="lg">
+        <Button className="w-36 md:w-48" size="lg">
           See Documentation
         </Button>
       </div>

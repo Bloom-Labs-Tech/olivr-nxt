@@ -20,6 +20,9 @@
     },
     "./types": {
       "import": "./src/types.ts"
+    },
+    "./translate": {
+      "import": "./src/translate.ts"
     }
   },
   "devDependencies": {

@@ -87,3 +87,8 @@ export const handleError = (error: unknown): { message: string, status: number }
     status: 500,
   }
 };
+
+export const parseNumber = (value: string | undefined | null, defaultValue: number) => {
+  const parsed = Number(value);
+  return Number.isNaN(parsed) ? defaultValue : parsed;
+}

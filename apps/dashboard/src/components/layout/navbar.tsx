@@ -32,7 +32,7 @@ export function Navbar() {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-4">
           <Link href="/">Oliver</Link>
-          <div className="flex space-x-4">
+          <div className="space-x-4 hidden md:flex">
             {navItems
               .filter((item) => isItemVisible(item, !!user))
               .map((item) => (

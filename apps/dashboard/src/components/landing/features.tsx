@@ -11,7 +11,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import { useEffect } from "react";
+import { MagicCard, MagicCards } from "../magicui/cards";
 const features = [
   {
     title: "Room Management",
@@ -70,43 +70,16 @@ const features = [
 ];
 
 export function Features() {
-  useEffect(() => {
-    const cardsContainer = document.getElementById("cards") as HTMLElement;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const cards = document.querySelectorAll(
-        ".card"
-      ) as NodeListOf<HTMLElement>;
-
-      for (let i = 0; i < cards.length; i++) {
-        const card = cards[i];
-        const rect = card.getBoundingClientRect();
-        const x = e.clientX - (rect.left ?? 0);
-        const y = e.clientY - (rect.top ?? 0);
-
-        card.style.setProperty("--mouse-x", `${x}px`);
-        card.style.setProperty("--mouse-y", `${y}px`);
-      }
-    };
-
-    cardsContainer?.addEventListener("mousemove", handleMouseMove);
-
-    return () => {
-      cardsContainer?.removeEventListener("mousemove", handleMouseMove);
-    };
-  }, []);
-
   return (
-    <section className="grid justify-center items-center h-fit">
-      <div
-        className="grid grid-rows-3 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:mx-36 lg:mx-24 md:mx-16 mx-8 2xl:mx-40"
-        id="cards"
-      >
-        {features.map((feature) => (
-          <Feature key={`feature-${feature.title}`} {...feature} />
-        ))}
-      </div>
-    </section>
+    <MagicCards parentId="features">
+      {features.map((feature, idx) => (
+        <Feature
+          key={`feature-${feature.title}`}
+          {...feature}
+          isLastElement={idx === features.length - 1}
+        />
+      ))}
+    </MagicCards>
   );
 }
 
@@ -118,14 +91,15 @@ function Feature({
   title: string;
   description: string;
   icon: React.ReactNode;
+  isLastElement: boolean;
 }) {
   return (
-    <div className="card">
-      <div className="card-content">
+    <MagicCard>
+      <div className="flex flex-col w-full h-full">
         {icon}
         <h3 className="text-xl font-semibold mb-2 text-white">{title}</h3>
         <p className="text-gray-300">{description}</p>
       </div>
-    </div>
+    </MagicCard>
   );
 }

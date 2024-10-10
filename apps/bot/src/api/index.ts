@@ -1,4 +1,4 @@
-import { getTimeBetweenDates } from "@olivr-nxt/common";
+import { getTimeBetweenDates, parseNumber } from "@olivr-nxt/common";
 import authRoutes from "~/api/auth";
 import feedbackRoutes from "~/api/feedback";
 import { fetchOrSet, rKey } from "~/client/database";
@@ -23,6 +23,7 @@ app.get("/stats", async (c) => {
 
   const guilds = await client.db.guild.count();
   const users = await client.db.user.count();
+  const translations = await client.redis.get(rKey('translate')).then((num) => parseNumber(num, 0));
   const stats = await fetchOrSet(rKey('stats'), async () => {
     return await client.db.guild.aggregate({
       _sum: {
@@ -55,7 +56,7 @@ app.get("/stats", async (c) => {
     return c.json({ error: 'Failed to fetch stats' }, 500);
   }
 
-  return c.json({ ...stats, guilds, users });
+  return c.json({ ...stats, guilds, users, translations });
 });
 
 app.route("/auth", authRoutes);
